@@ -28,4 +28,63 @@ function addStudent() {
   })
     .then(res => {
       if (!res.ok) throw new Error("Failed to add student");
-      return
+      return res.json();
+    })
+    .then(() => {
+      clearForm();
+      loadStudents();
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Error adding student");
+    });
+}
+
+// LOAD STUDENTS
+function loadStudents() {
+  fetch(API_URL)
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById("studentList");
+      list.innerHTML = "";
+
+      if (data.length === 0) {
+        list.innerHTML = "<li>No students found</li>";
+        return;
+      }
+
+      data.forEach(s => {
+        list.innerHTML += `
+          <li>
+            <b>${s.name}</b> (${s.course})
+            <button onclick="deleteStudent(${s.id})">❌</button>
+          </li>
+        `;
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Error loading students");
+    });
+}
+
+// DELETE STUDENT
+function deleteStudent(id) {
+  if (!confirm("Delete this student?")) return;
+
+  fetch(`${API_URL}/${id}`, {
+    method: "DELETE"
+  })
+    .then(() => loadStudents())
+    .catch(err => {
+      console.error(err);
+      alert("Error deleting student");
+    });
+}
+
+// CLEAR FORM
+function clearForm() {
+  document.getElementById("name").value = "";
+  document.getElementById("email").value = "";
+  document.getElementById("course").value = "";
+}
